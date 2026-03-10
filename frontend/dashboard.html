@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOVA Finance — Dashboard</title>
+    <link rel="stylesheet" href="/frontend/css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-mark">N</div>
+                <div>
+                    <div class="logo-text">NOVA</div>
+                </div>
+                <span class="logo-tag">Finance</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Principal</div>
+                <a class="nav-item active" href="/dashboard.html">
+                    <span class="nav-icon">◈</span> Dashboard
+                </a>
+                <a class="nav-item" href="/ai.html">
+                    <span class="nav-icon">✦</span> Agente NOVA
+                </a>
+
+                <div class="nav-section-label">Finanzas</div>
+                <div class="nav-item" onclick="scrollToSection('section-transactions')">
+                    <span class="nav-icon">⇅</span> Transacciones
+                </div>
+                <div class="nav-item" onclick="scrollToSection('section-goals')">
+                    <span class="nav-icon">◎</span> Metas
+                </div>
+                <div class="nav-item" onclick="scrollToSection('section-charts')">
+                    <span class="nav-icon">◑</span> Gráficas
+                </div>
+
+                <div class="nav-section-label">Acciones</div>
+                <div class="nav-item" onclick="openModal('modal-tx')">
+                    <span class="nav-icon">＋</span> Nueva transacción
+                </div>
+                <div class="nav-item" onclick="openModal('modal-goal')">
+                    <span class="nav-icon">⊕</span> Nueva meta
+                </div>
+                <div class="nav-item">
+                    <!-- En tu dashboard.html donde quieras poner el botón -->
+                    <button id="btn-sync" onclick="syncTransactions()">
+                        🔄 Sincronizar movimientos bancarios
+                    </button>
+                    <p id="sync-status"></p>
+                </div>
+            </nav>
+
+            <div class="sidebar-user">
+                <div class="sidebar-user-info">
+                    <div class="user-avatar" id="user-avatar">
+                    </div>
+                    <div style="overflow:hidden">
+                        <div class="user-name" id="user-name">—</div>
+                        <div class="user-email" id="user-email">—</div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost btn-full" style="margin-top:8px;font-size:12px" onclick="auth.logout()">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- ── Header ──────────────────────────────────────────────────────────── -->
+        <header class="app-header">
+            <div class="header-title">
+                Hola, <span class="greeting-name">—</span> 👋
+            </div>
+            <div class="header-actions">
+                <a href="/frontend/ai.html" class="btn btn-secondary btn-sm">
+                    ✦ Hablar con NOVA
+                </a>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-tx')">
+                    + Transacción
+                </button>
+            </div>
+        </header>
+
+        <!-- ── Main content ─────────────────────────────────────────────────────── -->
+        <main class="app-content">
+
+            <!-- Stat cards -->
+            <div class="stat-cards page-section">
+                <div class="stat-card income">
+                    <div class="stat-icon">↑</div>
+                    <div class="stat-label">Ingresos totales</div>
+                    <div class="stat-value" id="stat-income">—</div>
+                    <div class="stat-change">Este período</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-icon">↓</div>
+                    <div class="stat-label">Gastos totales</div>
+                    <div class="stat-value" id="stat-expense">—</div>
+                    <div class="stat-change">Este período</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-icon">≈</div>
+                    <div class="stat-label">Balance neto</div>
+                    <div class="stat-value" id="stat-balance">—</div>
+                    <div class="stat-change">Ingreso − Gastos</div>
+                </div>
+                <div class="stat-card goals">
+                    <div class="stat-icon">◎</div>
+                    <div class="stat-label">Metas activas</div>
+                    <div class="stat-value" id="stat-goals">—</div>
+                    <div class="stat-change">En progreso</div>
+                </div>
+            </div>
+
+            <!-- Charts row -->
+            <div id="section-charts" class="grid-2 page-section" style="margin-bottom:24px">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Ingresos vs. Gastos</div>
+                            <div class="card-subtitle">Por mes</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-monthly"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Gastos por categoría</div>
+                            <div class="card-subtitle">Distribución</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-categories"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-section" style="margin-bottom:24px">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Balance acumulado</div>
+                            <div class="card-subtitle">Evolución mes a mes</div>
+                        </div>
+                    </div>
+                    <div class="chart-container-sm" style="height:160px">
+                        <canvas id="chart-balance"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions + Goals -->
+            <div class="grid-3-2 page-section" style="margin-bottom:24px">
+
+                <!-- Transactions -->
+                <div id="section-transactions" class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Transacciones</div>
+                            <div class="card-subtitle">Últimas 30</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('modal-tx')">+ Nueva</button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+                        <select id="filter-type" style="max-width:130px;padding:7px 10px;font-size:12px"
+                            onchange="applyFilters()">
+                            <option value="">Todos los tipos</option>
+                            <option value="income">Ingresos</option>
+                            <option value="expense">Gastos</option>
+                        </select>
+                        <select id="filter-category" style="max-width:160px;padding:7px 10px;font-size:12px"
+                            onchange="applyFilters()">
+                            <option value="">Todas las categorías</option>
+                        </select>
+                        <input type="date" id="filter-start" style="max-width:140px;padding:7px 10px;font-size:12px"
+                            onchange="applyFilters()" />
+                        <input type="date" id="filter-end" style="max-width:140px;padding:7px 10px;font-size:12px"
+                            onchange="applyFilters()" />
+                        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Limpiar</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                    <th>Categoría</th>
+                                    <th>Descripción</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-tbody">
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="skeleton" style="height:40px"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Goals -->
+                <div id="section-goals" class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Metas de ahorro</div>
+                            <div class="card-subtitle">Activas</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="openModal('modal-goal')">+ Meta</button>
+                    </div>
+                    <div id="goals-list" style="display:flex;flex-direction:column;gap:12px">
+                        <div class="skeleton" style="height:80px;border-radius:12px"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ── Modal: Nueva transacción ─────────────────────────────────────────────── -->
+    <div class="modal-overlay" id="modal-tx">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Nueva transacción</div>
+                <div class="modal-close" onclick="closeModal('modal-tx')">×</div>
+            </div>
+            <form id="form-tx" onsubmit="handleCreateTransaction(event)">
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <input type="hidden" id="tx-type" value="expense" />
+                    <div class="type-toggle">
+                        <div class="type-btn income" id="type-income" onclick="setTxType('income')">↑ Ingreso</div>
+                        <div class="type-btn expense active" id="type-expense" onclick="setTxType('expense')">↓ Gasto
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Monto</label>
+                        <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" id="tx-date" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Categoría</label>
+                    <select id="tx-category" required>
+                        <option value="">Selecciona categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción (opcional)</label>
+                    <input type="text" id="tx-description" placeholder="Ej: Almuerzo en el trabajo" />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-tx')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="create-tx-btn" style="width:auto">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Modal: Nueva meta ─────────────────────────────────────────────────────── -->
+    <div class="modal-overlay" id="modal-goal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Nueva meta de ahorro</div>
+                <div class="modal-close" onclick="closeModal('modal-goal')">×</div>
+            </div>
+            <form id="form-goal" onsubmit="handleCreateGoal(event)">
+                <div class="form-group">
+                    <label class="form-label">Nombre de la meta</label>
+                    <input type="text" id="goal-title" placeholder="Ej: Viaje a Europa" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Monto objetivo</label>
+                    <input type="number" id="goal-amount" placeholder="0.00" step="0.01" min="1" required />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-goal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="create-goal-btn" style="width:auto">Crear
+                        meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Modal: Abonar a meta ──────────────────────────────────────────────────── -->
+    <div class="modal-overlay" id="modal-allocate">
+        <div class="modal" style="max-width:360px">
+            <div class="modal-header">
+                <div class="modal-title">Abonar a meta</div>
+                <div class="modal-close" onclick="closeModal('modal-allocate')">×</div>
+            </div>
+            <p style="color:var(--text2);margin-bottom:16px;font-size:13px">
+                Meta: <strong id="allocate-goal-name"></strong>
+            </p>
+            <form id="form-allocate" onsubmit="handleAllocate(event)">
+                <div class="form-group">
+                    <label class="form-label">Monto a abonar</label>
+                    <input type="number" id="allocate-amount" placeholder="0.00" step="0.01" min="0.01" required />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('modal-allocate')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="allocate-btn" style="width:auto">Abonar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/dashboard.js"></script>
+    <script>
+        function scrollToSection(id) {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        const syncTransactions = async () => {
+            const btn = document.getElementById('btn-sync');
+            const status = document.getElementById('sync-status');
+            const token = localStorage.getItem('token');
+
+            // Mostrar loading
+            btn.disabled = true;
+            btn.textContent = '⏳ Sincronizando...';
+            status.textContent = '';
+
+            try {
+                const res = await fetch('http://localhost:3000/api/gmail/sync', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    status.textContent = `✅ ${data.data.inserted} nuevos movimientos importados`;
+                } else {
+                    status.textContent = `❌ ${data.message}`;
+                }
+
+            } catch (err) {
+                status.textContent = '❌ Error de conexión';
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Sincronizar movimientos bancarios';
+            }
+        };
+
+    </script>
+</body>
+
+</html>
