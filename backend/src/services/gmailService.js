@@ -21,7 +21,7 @@ export const getBankEmails = async (accessToken) => {
 
   const response = await gmail.users.messages.list({
     userId: "me",
-    q: `(${query}) newer_than:30d`,
+    q: `(${query}) newer_than:365d`,
     maxResults: 100,
   });
 

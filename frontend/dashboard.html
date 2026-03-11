@@ -332,43 +332,6 @@
         function scrollToSection(id) {
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
-        const syncTransactions = async () => {
-            const btn = document.getElementById('btn-sync');
-            const status = document.getElementById('sync-status');
-            const token = localStorage.getItem('token');
-
-            // Mostrar loading
-            btn.disabled = true;
-            btn.textContent = '⏳ Sincronizando...';
-            status.textContent = '';
-
-            try {
-                const res = await fetch('http://localhost:3000/api/gmail/sync', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await res.json();
-
-                if (data.success) {
-                    status.textContent = `✅ ${data.data.inserted} nuevos movimientos importados`;
-                } else {
-                    status.textContent = `❌ ${data.message}`;
-                }
-
-            } catch (err) {
-                status.textContent = '❌ Error de conexión';
-                console.error(err);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔄 Sincronizar movimientos bancarios';
-            }
-        };
-
     </script>
 </body>
 

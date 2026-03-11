@@ -1,3 +1,4 @@
+// src/services/goalService.js
 import { pool } from "../config/db.js";
 import { NotFoundError, ConflictError } from "../errors/AppError.js";
 
@@ -69,7 +70,6 @@ export const goalService = {
   },
 
   async delete(id, userId) {
-    // Transacción de DB: borrar allocations + goal atómicamente
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
@@ -98,66 +98,17 @@ export const goalService = {
       await conn.rollback();
       throw err;
     } finally {
-      conn.release(); // siempre devolver al pool
+      conn.release();
     }
   },
 
-  // async allocate(id, userId, amount) {
-  //   const conn = await pool.getConnection();
-  //   try {
-  //     await conn.beginTransaction();
-
-  //     // FOR UPDATE bloquea la fila para evitar race conditions
-  //     const [goalRows] = await conn.execute(
-  //       'SELECT id, target_amount, current_amount, is_completed FROM goals WHERE id = ? AND user_id = ? FOR UPDATE',
-  //       [id, userId]
-  //     );
-
-  //     if (goalRows.length === 0) { await conn.rollback(); throw new NotFoundError('Meta', 'GOAL_NOT_FOUND'); }
-
-  //     const goal = goalRows[0];
-  //     if (goal.is_completed) { await conn.rollback(); throw new ConflictError('Esta meta ya está completada', 'GOAL_ALREADY_COMPLETED'); }
-
-  //     const newAmount   = parseFloat(goal.current_amount) + parseFloat(amount);
-  //     const isCompleted = newAmount >= parseFloat(goal.target_amount);
-
-  //     await conn.execute(
-  //       `UPDATE goals SET current_amount = ?, is_completed = ?, completed_at = ?, updated_at = NOW()
-  //        WHERE id = ? AND user_id = ?`,
-  //       [newAmount, isCompleted ? 1 : 0, isCompleted ? new Date() : null, id, userId]
-  //     );
-
-  //     const [allocResult] = await conn.execute(
-  //       'INSERT INTO goal_allocations (user_id, goal_id, amount) VALUES (?, ?, ?)',
-  //       [userId, id, parseFloat(amount)]
-  //     );
-
-  //     await conn.commit();
-
-  //     const [[updatedGoal]] = await pool.execute(
-  //       'SELECT id, title, target_amount, current_amount, is_completed, completed_at FROM goals WHERE id = ?',
-  //       [id]
-  //     );
-  //     const [[allocation]] = await pool.execute(
-  //       'SELECT id, amount, created_at FROM goal_allocations WHERE id = ?',
-  //       [allocResult.insertId]
-  //     );
-
-  //     return { goal: updatedGoal, allocation, justCompleted: isCompleted };
-  //   } catch (err) {
-  //     await conn.rollback();
-  //     throw err;
-  //   } finally {
-  //     conn.release();
-  //   }
-  // },
   async allocate(id, userId, amount) {
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
 
       const [goalRows] = await conn.execute(
-        "SELECT id, target_amount, current_amount, is_completed FROM goals WHERE id = ? AND user_id = ? FOR UPDATE",
+        "SELECT id, title, target_amount, current_amount, is_completed FROM goals WHERE id = ? AND user_id = ? FOR UPDATE",
         [id, userId],
       );
 
@@ -181,19 +132,18 @@ export const goalService = {
       await conn.execute(
         `UPDATE goals SET current_amount = ?, is_completed = ?, completed_at = ?, updated_at = NOW()
          WHERE id = ? AND user_id = ?`,
-        [
-          newAmount,
-          isCompleted ? 1 : 0,
-          isCompleted ? new Date() : null,
-          id,
-          userId,
-        ],
+        [newAmount, isCompleted ? 1 : 0, isCompleted ? new Date() : null, id, userId],
       );
 
-      // ✅ NUEVO - registrar como transacción saving
+      // Buscar categoría global Ahorro
+      const [[savingCat]] = await conn.execute(
+        "SELECT id FROM categories WHERE name = 'Ahorro' AND user_id IS NULL LIMIT 1"
+      );
+
+      // Registrar como saving — descuenta del balance disponible
       await conn.execute(
-        'INSERT INTO transactions (user_id, amount, type, description) VALUES (?, ?, "saving", ?)',
-        [userId, parseFloat(amount), `Aporte a meta: ${goal.title ?? ""}`],
+        "INSERT INTO transactions (user_id, amount, type, category_id, description, date) VALUES (?, ?, 'saving', ?, ?, CURDATE())",
+        [userId, parseFloat(amount), savingCat.id, `Aporte a meta: ${goal.title ?? ''}`],
       );
 
       const [allocResult] = await conn.execute(
@@ -220,7 +170,7 @@ export const goalService = {
       conn.release();
     }
   },
-  // ✅ NUEVO - decisión final cuando meta se completa
+
   async completeGoal(id, userId, completionType) {
     const conn = await pool.getConnection();
     try {
@@ -236,24 +186,14 @@ export const goalService = {
         throw new NotFoundError("Meta", "GOAL_NOT_FOUND");
       }
 
-      const goal = goalRows[0];
-
-      // Guardar decisión del usuario
-      await conn.execute("UPDATE goals SET completion_type = ? WHERE id = ?", [
-        completionType,
-        id,
-      ]);
-
-      // Si decidió gastar → registrar como expense
-      if (completionType === "expense") {
-        await conn.execute(
-          'INSERT INTO transactions (user_id, amount, type, description) VALUES (?, ?, "expense", ?)',
-          [userId, goal.target_amount, `Meta cumplida: ${goal.title}`],
-        );
-      }
+      // Solo guardar la decisión — el dinero ya salió del balance con los aportes
+      await conn.execute(
+        "UPDATE goals SET completion_type = ? WHERE id = ?",
+        [completionType, id],
+      );
 
       await conn.commit();
-      return { completionType, title: goal.title };
+      return { completionType, title: goalRows[0].title };
     } catch (err) {
       await conn.rollback();
       throw err;

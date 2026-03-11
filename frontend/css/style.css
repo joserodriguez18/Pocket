@@ -523,7 +523,7 @@ textarea::placeholder {
   overflow: hidden;
 }
 
-.user-avatar img{
+.user-avatar img {
   width: 100%;
 }
 
@@ -790,6 +790,15 @@ tr:hover td {
 .badge-gold {
   background: var(--gold2);
   color: var(--gold);
+}
+
+.badge-saving {
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
+}
+
+.badge-saving {
+  color: #a78bfa;
 }
 
 /* ─── Amount display ──────────────────────────────────────────────────────────── */
@@ -1483,4 +1492,26 @@ tr:hover td {
 
 .btn-google:hover {
   background: rgba(255, 255, 255, .12)
+}
+
+.sync-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b92a8;
+}
+
+.sync-pet {
+  font-size: 1.4rem;
+  animation: bounce 0.6s infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(-6px);
+  }
 }

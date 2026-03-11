@@ -48,24 +48,24 @@ export const deleteGoal = async (req, res, next) => {
   }
 };
 
-export const allocateToGoal = async (req, res, next) => {
-  try {
-    const result = await goalService.allocate(
-      req.params.id,
-      req.user.id,
-      req.body.amount,
-    );
-    res.status(201).json({
-      success: true,
-      message: result.justCompleted
-        ? "🎉 ¡Meta completada!"
-        : "Abono registrado",
-      data: { goal: result.goal, allocation: result.allocation },
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+// export const allocateToGoal = async (req, res, next) => {
+//   try {
+//     const result = await goalService.allocate(
+//       req.params.id,
+//       req.user.id,
+//       req.body.amount,
+//     );
+//     res.status(201).json({
+//       success: true,
+//       message: result.justCompleted
+//         ? "🎉 ¡Meta completada!"
+//         : "Abono registrado",
+//       data: { goal: result.goal, allocation: result.allocation },
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 // Esto es para saber que vamos a hacer con el dinero al final cuando se cumpla una meta
 // Aporte a una meta
@@ -101,22 +101,16 @@ export const addContribution = async (req, res, next) => {
   }
 };
 
+
 // Decisión final cuando la meta se completa
 export const completeGoal = async (req, res, next) => {
   try {
-    const result = await goalService.completeGoal(
+    await goalService.completeGoal(
       req.params.goalId,
       req.user.id,
       req.body.completionType,
     );
-
-    res.json({
-      success: true,
-      message:
-        result.completionType === "expense"
-          ? "Meta registrada como gasto"
-          : "Meta guardada como ahorro",
-    });
+    res.json({ success: true });
   } catch (err) {
     next(err);
   }

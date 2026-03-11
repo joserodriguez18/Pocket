@@ -264,8 +264,16 @@ function renderTransactionsTable(txList) {
     tbody.innerHTML = list.slice(0, 30).map(tx => `
     <tr>
       <td>${fmt.date(tx.date)}</td>
-      <td><span class="badge badge-${tx.type}">${tx.type === 'income' ? '↑ Ingreso' : '↓ Gasto'}</span></td>
-      <td><span class="amount-${tx.type}">${tx.type === 'income' ? '+' : '-'}${fmt.currency(tx.amount)}</span></td>
+      <td>
+        <span class="badge badge-${tx.type}">
+            ${tx.type === 'income' ? '↑ Ingreso' : tx.type === 'saving' ? '→ Ahorro' : '↓ Gasto'}
+        </span>
+      </td>
+      <td>
+        <span class="badge-${tx.type}">
+            ${tx.type === 'income' ? '↑ Ingreso' : tx.type === 'saving' ? '→ Ahorro' : '↓ Gasto'}
+        </span>
+      </td>
       <td>${tx.category_name || '—'}</td>
       <td class="text-dim">${fmt.truncate(tx.description || '—', 28)}</td>
       <td>
@@ -422,30 +430,6 @@ function openAllocateModal(goalId, goalTitle) {
     openModal('modal-allocate');
 }
 
-// async function handleAllocate(e) {
-//     e.preventDefault();
-//     const btn = document.getElementById('allocate-btn');
-//     btn.disabled = true;
-//     btn.innerHTML = '<span class="spinner"></span>';
-
-//     try {
-//         const res = await goals.allocate(currentAllocateGoalId, document.getElementById('allocate-amount').value);
-//         if (res.data.goal.is_completed) {
-//             toast.success('🎉 ¡Meta completada! ¡Felicitaciones!');
-//         } else {
-//             toast.success('Abono registrado ✓');
-//         }
-//         closeModal('modal-allocate');
-//         document.getElementById('form-allocate').reset();
-//         await loadAllData();
-//     } catch (err) {
-//         toast.error(err.message);
-//     } finally {
-//         btn.disabled = false;
-//         btn.textContent = 'Abonar';
-//     }
-// }
-
 async function handleAllocate(e) {
     e.preventDefault();
     const btn = document.getElementById('allocate-btn');
@@ -454,18 +438,12 @@ async function handleAllocate(e) {
 
     try {
         const amount = document.getElementById('allocate-amount').value;
-        
+
         // ✅ Usar el nuevo endpoint que registra en goal_allocations + transactions
-        const res = await fetch(`http://localhost:3000/api/goals/${currentAllocateGoalId}/contribute`, {
+        const data = await apiFetch(`/goals/${currentAllocateGoalId}/contribute`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ amount: parseFloat(amount) })
         });
-
-        const data = await res.json();
 
         closeModal('modal-allocate');
         document.getElementById('form-allocate').reset();
@@ -487,52 +465,58 @@ async function handleAllocate(e) {
 }
 
 // ─── Goals ──────────────────────────────────────────────────────────────────
-// Cuando el usuario hace un aporte
-// const handleContribution = async (goalId, amount) => {
-//   const res = await fetch(`http://localhost:3000/api/goals/${goalId}/contribute`, {
-//     method: 'POST',
-//     headers: { 
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-//       'Content-Type': 'application/json' 
-//     },
-//     body: JSON.stringify({ amount })
-//   });
-
-//   const data = await res.json();
-
-//   if (data.data.completed) {
-//     // Mostrar modal de decisión
-//     showCompletionModal(data.data);
-//   } else {
-//     // Actualizar UI con el nuevo monto
-//     updateGoalProgress(goalId, data.data.newAmount);
-//   }
-// };
 
 const showCompletionModal = (goal) => {
-  const decision = confirm(
-    `🎉 ¡Meta "${goal.title}" completada!\n\n` +
-    `¿Qué deseas hacer con el dinero?\n\n` +
-    `✅ Aceptar = Registrar como gasto\n` +
-    `❌ Cancelar = Mantener como ahorro`
-  );
-  handleGoalCompletion(goal.goalId, decision ? 'expense' : 'saving');
+  toast.success(`🎉 ¡Meta "${goal.title}" completada!`);
+  handleGoalCompletion(goal.goalId, 'saving');
 };
 
 const handleGoalCompletion = async (goalId, completionType) => {
-  const res = await fetch(`http://localhost:3000/api/goals/${goalId}/complete`, {
-    method: 'POST',
-    headers: { 
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      'Content-Type': 'application/json' 
-    },
-    body: JSON.stringify({ completionType })
-  });
+  try {
+    await apiFetch(`/goals/${goalId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ completionType })
+    });
+    await loadAllData();
+  } catch (err) {
+    toast.error(err.message);
+  }
+};
 
-  const data = await res.json();
-  alert(data.message);
-  // Recargar metas
-  loadGoals();
+// ─── Sync Gmail ───────────────────────────────────────────────────────────────
+const syncTransactions = async () => {
+    const btn = document.getElementById('btn-sync');
+
+    btn.disabled = true;
+    btn.innerHTML = '🐾 Buscando...';
+
+    // Animación de puntos mientras carga
+    let dots = 0;
+    const loading = setInterval(() => {
+        dots = (dots + 1) % 4;
+        btn.innerHTML = `🐾 Buscando${''.padEnd(dots, '.')}`;
+    }, 400);
+
+    try {
+        const data = await apiFetch('/gmail/sync', { method: 'POST' });
+
+        if (data.success) {
+            if (data.data.inserted > 0) {
+                toast.success(`✅ ${data.data.inserted} nuevos movimientos importados`);
+                await loadAllData();
+            } else {
+                toast.info('No hay movimientos nuevos');
+            }
+        } else {
+            toast.error(data.message);
+        }
+    } catch (err) {
+        toast.error('❌ Error de conexión');
+    } finally {
+        clearInterval(loading); // ← detiene la animación
+        btn.disabled = false;
+        btn.innerHTML = '🔄 Sincronizar movimientos bancarios';
+    }
 };
 
 // SQL

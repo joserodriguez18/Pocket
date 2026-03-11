@@ -27,7 +27,7 @@ const TABLES = [
     id          INT AUTO_INCREMENT PRIMARY KEY,
     user_id     INT NOT NULL,
     category_id INT NOT NULL,
-    type        ENUM('income','expense') NOT NULL,
+    type        ENUM('income', 'expense', 'saving') NOT NULL,
     amount      DECIMAL(12,2) NOT NULL,
     description TEXT,
     date        DATE NOT NULL DEFAULT (CURRENT_DATE),
