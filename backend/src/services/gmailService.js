@@ -14,7 +14,7 @@ export const getBankEmails = async (accessToken) => {
   const gmail = getGmailClient(accessToken);
 
   const query = [
-    "from:an.notificacionesbancolombia.com",
+    "from:notificacionesbancolombia.com",
     "from:davivienda.com",
     "from:bancodebogota.com.co",
   ].join(" OR ");
@@ -101,5 +101,6 @@ export const syncTransactions = async (userId) => {
     inserted++;
   }
 
+   console.log(`✅ Insertados: ${inserted} | ⏭️ Saltados: ${skipped} | 📧 Total emails: ${transactions.length}`);
   return { inserted, skipped, total: emails.length };
 };

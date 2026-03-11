@@ -3,7 +3,7 @@ import { parseBancolombia } from "./bancolombiaParser.js";
 // Remitentes conocidos de cada banco
 const BANK_SENDERS = {
   // ✅ Usa solo la parte del dominio, no el email completo
-  bancolombia: ["an.notificacionesbancolombia.com"],
+  bancolombia: ["notificacionesbancolombia.com"],
   davivienda: ["davivienda.com"],
   bogota: ["bancodebogota.com.co"],
 };
@@ -19,30 +19,60 @@ const detectBank = (fromHeader) => {
   return null;
 };
 
+// export const parseTransaction = (emailData) => {
+//   // Decodificar body del email desde base64
+//   const parts = emailData.payload.parts || [emailData.payload];
+//   let body = "";
+//   for (const part of parts) {
+//     if (part.mimeType === "text/plain" && part.body?.data) {
+//       body = Buffer.from(part.body.data, "base64").toString("utf-8");
+//       break;
+//     }
+//   }
+
+//   // Si no hay texto plano, intentar con HTML
+//   if (!body) {
+//     for (const part of parts) {
+//       if (part.mimeType === "text/html" && part.body?.data) {
+//         body = Buffer.from(part.body.data, "base64")
+//           .toString("utf-8")
+//           .replace(/<[^>]+>/g, " ") // strip HTML tags
+//           .replace(/\s+/g, " ")
+//           .trim();
+//         break;
+//       }
+//     }
+//   }
+
 export const parseTransaction = (emailData) => {
-  // Decodificar body del email desde base64
   const parts = emailData.payload.parts || [emailData.payload];
   let body = "";
+  let bodySource = ""; // 👈 agregar
+
   for (const part of parts) {
     if (part.mimeType === "text/plain" && part.body?.data) {
       body = Buffer.from(part.body.data, "base64").toString("utf-8");
+      bodySource = "text/plain"; // 👈
       break;
     }
   }
 
-  // Si no hay texto plano, intentar con HTML
   if (!body) {
     for (const part of parts) {
       if (part.mimeType === "text/html" && part.body?.data) {
         body = Buffer.from(part.body.data, "base64")
           .toString("utf-8")
-          .replace(/<[^>]+>/g, " ") // strip HTML tags
+          .replace(/<[^>]+>/g, " ")
           .replace(/\s+/g, " ")
           .trim();
+        bodySource = "text/html"; // 👈
         break;
       }
     }
   }
+
+  console.log(`📨 Fuente del body: ${bodySource}`); // 👈
+  console.log(`📝 Primeros 300 chars: ${body.substring(0, 300)}`); // 👈
 
   // Detectar banco por remitente
   const fromHeader = emailData.payload.headers.find(
