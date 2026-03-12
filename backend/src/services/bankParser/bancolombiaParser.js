@@ -1,139 +1,327 @@
-// Patrones extraídos de correos reales de Bancolombia
+import { htmlToText } from "html-to-text";
 
-export const parseBancolombia = (body) => {
-  const cleanBody = body
-    .replace(/\r?\n/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/Bancolombia:/g, " Bancolombia:")
-    .trim();
+export const parseBancolombiaEmail = (rawBody, mimeType) => {
+
+  const body = cleanText(normalizeBody(rawBody, mimeType));
+
+  if (!body.includes("Bancolombia:")) return null;
 
   const transaction = {
-    amount: null,
     type: null,
     description: null,
     merchant: null,
-    date: null,
-    bank: "Bancolombia",
+    amount: null,
+    date: null
   };
 
-  // ─── 1. INGRESO - Nómina, proveedor o pago recibido ───────────────────────
-  // "Recibiste un pago de Nomina de RETABLOS MED SA por $776,000.00"
-  // "Recibiste un pago PROVEEDOR de PEXTO COLOMBIA por $114,160.70"
-  const ingresoMatch = cleanBody.match(
-    /Recibiste un pago .+? de (.+?) por \$([\d,.]+)/i
+  // =====================
+  // RECIBISTE DINERO
+  // =====================
+
+  // const income = body.match(
+  //   /Recibiste\s+\$?([\d.,]+).*?de\s+(.+?)\s+(?:en|a)\s+tu\s+cuenta/i
+  // );
+
+  // if (income) {
+  //   transaction.type = "income";
+  //   transaction.amount = parseAmount(income[1]);
+  //   transaction.merchant = income[2].trim();
+  //   transaction.description = `Pago recibido de ${transaction.merchant}`;
+  //   transaction.date = extractDate(body);
+
+  //   return transaction;
+  // }
+
+  const income = body.match(
+    /Recibiste\s+un\s+pago\s+.+?\s+de\s+(.+?)\s+por\s+\$([\d,.]+)/i
   );
-  if (ingresoMatch) {
+
+  if (income) {
     transaction.type = "income";
-    transaction.description = `Pago recibido: ${ingresoMatch[1].trim()}`;
-    transaction.merchant = ingresoMatch[1].trim();
-    transaction.amount = parseAmount(ingresoMatch[2]);
-    transaction.date = extractDate(cleanBody);
+    transaction.merchant = income[1].trim();
+    transaction.amount = parseAmount(income[2]);
+    transaction.description = `Pago recibido de ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
     return transaction;
   }
 
-  // ─── 2. TRANSFERENCIA RECIBIDA ─────────────────────────────────────────────
-  // "Recibiste una transferencia por $280,000.00 de AL DIA INGENIERIA SAS en tu cuenta *6429"
-  const transferenciaRecibidaMatch = cleanBody.match(
-    /Recibiste una transferencia por \$([\d,.]+) de (.+?) en tu cuenta/i
-  );
-  if (transferenciaRecibidaMatch) {
-    transaction.type = "income";
-    transaction.description = `Transferencia recibida de: ${transferenciaRecibidaMatch[2].trim()}`;
-    transaction.merchant = transferenciaRecibidaMatch[2].trim();
-    transaction.amount = parseAmount(transferenciaRecibidaMatch[1]);
-    transaction.date = extractDate(cleanBody);
-    return transaction;
-  }
+  // =====================
+  // COMPRA TARJETA
+  // =====================
 
-  // ─── 3. COMPRA - Tarjeta débito o crédito ─────────────────────────────────
-  // "Compraste $11.900,00 en DLO*GOOGLE Google On con tu T.Deb *2998"
-  const compraMatch = cleanBody.match(
-    /Compraste \$([\d,.]+) en (.+?) con tu/i
+  const purchase = body.match(
+    /(Compraste|Compra)\s+\$?([\d.,]+)\s+(?:en|a)\s+(.+?)(?:\s|$)/i
   );
-  if (compraMatch) {
+
+  if (purchase) {
     transaction.type = "expense";
-    transaction.description = `Compra en: ${compraMatch[2].trim()}`;
-    transaction.merchant = compraMatch[2].trim();
-    transaction.amount = parseAmount(compraMatch[1]);
-    transaction.date = extractDate(cleanBody);
+    transaction.amount = parseAmount(purchase[2]);
+    transaction.merchant = purchase[3].trim();
+    transaction.description = `Compra en ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
     return transaction;
   }
 
-  // ─── 4. TRANSFERENCIA ENVIADA ──────────────────────────────────────────────
-  // "Transferiste $2,300.00 desde tu cuenta 4155 a la cuenta *3122994475"
-  const transferenciaMatch = cleanBody.match(
-    /Transferiste \$([\d,.]+) desde tu cuenta (\d+) a la cuenta \*?([\w\d]+)/i
+  // =====================
+  // RETIRO
+  // =====================
+
+  const withdrawal = body.match(
+    /(Retiraste|Retiro)\s+\$?([\d.,]+)/i
   );
-  if (transferenciaMatch) {
+
+  if (withdrawal) {
     transaction.type = "expense";
-    transaction.description = `Transferencia a cuenta *${transferenciaMatch[3].slice(-4)}`;
-    transaction.merchant = `Cuenta *${transferenciaMatch[3].slice(-4)}`;
-    transaction.amount = parseAmount(transferenciaMatch[1]);
-    transaction.date = extractDate(cleanBody);
+    transaction.amount = parseAmount(withdrawal[2]);
+    transaction.merchant = "Cajero";
+    transaction.description = "Retiro cajero";
+    transaction.date = extractDate(body);
+
     return transaction;
   }
 
-  // ─── 5. RETIRO EN CAJERO ───────────────────────────────────────────────────
-  // "Retiraste $40.000,00 en SAN_JAVIER1 de tu T.Deb **2998"
-  const retiroMatch = cleanBody.match(
-    /Retiraste \$([\d,.]+) en (.+?) de tu/i
+  // =====================
+  // TRANSFERENCIA ENVIADA
+  // =====================
+
+  const transfer = body.match(
+    /Transferiste\s+\$?([\d.,]+)\s+a\s+(.+?)(?:\s|$)/i
   );
-  if (retiroMatch) {
-    transaction.type = "expense";
-    transaction.description = `Retiro en: ${retiroMatch[2].trim()}`;
-    transaction.merchant = retiroMatch[2].trim();
-    transaction.amount = parseAmount(retiroMatch[1]);
-    transaction.date = extractDate(cleanBody);
+
+  if (transfer) {
+    transaction.type = "transfer";
+    transaction.amount = parseAmount(transfer[1]);
+    transaction.merchant = transfer[2].trim();
+    transaction.description = `Transferencia a ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
     return transaction;
   }
 
-  // ─── 6. PAGO DE SERVICIO ───────────────────────────────────────────────────
-  // "Pagaste $X a NOMBRE el DD/MM/YYYY"
-  const pagoMatch = cleanBody.match(
-    /Pagaste \$([\d,.]+) a (.+?) el/i
-  );
-  if (pagoMatch) {
-    transaction.type = "expense";
-    transaction.description = `Pago a: ${pagoMatch[2].trim()}`;
-    transaction.merchant = pagoMatch[2].trim();
-    transaction.amount = parseAmount(pagoMatch[1]);
-    transaction.date = extractDate(cleanBody);
-    return transaction;
-  }
-
-  return null; // tipo de correo no reconocido
+  return null;
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// Normaliza montos colombianos y americanos
-// "11.900,00" → 11900.00  |  "167,200.00" → 167200.00
-const parseAmount = (raw) => {
-  if (!raw) return null;
-  if (raw.includes(",") && raw.indexOf(",") > raw.indexOf(".")) {
-    return parseFloat(raw.replace(/\./g, "").replace(",", "."));
+// =====================
+// HELPERS
+// =====================
+
+function normalizeBody(body, mimeType) {
+
+  if (mimeType === "text/html") {
+    return htmlToText(body, {
+      wordwrap: false,
+      selectors: [{ selector: "img", format: "skip" }]
+    });
   }
-  return parseFloat(raw.replace(/,/g, ""));
-};
 
-// Extrae fecha: "el 06/09/2025 a las 00:49" → Date
-const extractDate = (cleanBody) => {
-  const dateMatch = cleanBody.match(
-    /el (\d{2}\/\d{2}\/\d{4}) a las (\d{2}:\d{2})/i
+  return body;
+}
+
+function cleanText(text) {
+
+  return text
+    .replace(/\[https?:\/\/.*?\]/g, "")
+    .replace(/Logo Bancolombia/gi, "")
+    .replace(/yellow-icon/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseAmount(value) {
+  const clean = value.replace(/[^\d.,]/g, "");
+
+  // si el decimal es coma
+  if (clean.includes(",") && clean.lastIndexOf(",") > clean.lastIndexOf(".")) {
+    return parseFloat(
+      clean
+        .replace(/\./g, "")
+        .replace(",", ".")
+    );
+  }
+
+  // si el decimal es punto
+  return parseFloat(
+    clean.replace(/,/g, "")
   );
-  if (dateMatch) {
-    const [day, month, year] = dateMatch[1].split("/");
-    return new Date(`${year}-${month}-${day}T${dateMatch[2]}:00`);
+}
+
+// function parseAmount(value) {
+//   return parseFloat(
+//     value
+//       .replace(/[^\d,.-]/g, "")
+//       .replace(/\./g, "")
+//       .replace(",", ".")
+//   );
+// }
+
+function extractDate(text) {
+
+  // formato: 23/04/25 a las 19:07
+  let match = text.match(
+    /(\d{4})\/(\d{2})\/(\d{2,4}).*?(\d{2}:\d{2})/
+  );
+
+  if (match) {
+
+    let day = match[1];
+    let month = match[2];
+    let year = match[3];
+
+    if (year.length === 2) {
+      year = "20" + year;
+    }
+
+    return new Date(`${year}-${month}-${day} ${match[4]}`);
   }
+
+  // fallback → hoy
   return new Date();
-};
-// ```
+}
 
-// Cubre estos 6 tipos de transacción:
-// ```
-// income  → Pago recibido (nómina, proveedor, cualquier tipo)
-// income  → Transferencia recibida
-// expense → Compra con tarjeta
-// expense → Transferencia enviada
-// expense → Retiro en cajero
-// expense → Pago de servicio
+// function extractDate(text) {
+
+//   const match = text.match(
+//     /(\d{2}\/\d{2}\/\d{4}).*?(\d{2}:\d{2})/
+//   );
+
+//   if (!match) return null;
+
+//   const [day, month, year] = match[1].split("/");
+
+//   return new Date(`${year}-${month}-${day} ${match[2]}`);
+// }
+
+/*import { htmlToText } from "html-to-text";
+
+export const parseBancolombiaEmail = (rawBody, mimeType) => {
+
+  const body = cleanText(normalizeBody(rawBody, mimeType));
+
+  const transaction = {
+    type: null,
+    description: null,
+    merchant: null,
+    amount: null,
+    date: null
+  };
+
+  // =====================
+  // RECIBISTE DINERO
+  // =====================
+
+  const income = body.match(
+    /Recibiste\s+\$([\d,.]+).*?de\s+(.+?)\s+en\s+tu\s+cuenta/i
+  );
+
+  if (income) {
+    transaction.type = "income";
+    transaction.amount = parseAmount(income[1]);
+    transaction.merchant = income[2].trim();
+    transaction.description = `Pago recibido: ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
+    return transaction;
+  }
+
+  // =====================
+  // COMPRA TARJETA
+  // =====================
+
+  const purchase = body.match(
+    /Compra\s+por\s+\$([\d,.]+)\s+en\s+(.+?)\s+(?:con|en\s+tu\s+tarjeta)/i
+  );
+
+  if (purchase) {
+    transaction.type = "expense";
+    transaction.amount = parseAmount(purchase[1]);
+    transaction.merchant = purchase[2].trim();
+    transaction.description = `Compra en ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
+    return transaction;
+  }
+
+  // =====================
+  // RETIRO CAJERO
+  // =====================
+
+  const withdrawal = body.match(
+    /Retiraste\s+\$([\d,.]+)\s+de\s+tu\s+cuenta/i
+  );
+
+  if (withdrawal) {
+    transaction.type = "expense";
+    transaction.amount = parseAmount(withdrawal[1]);
+    transaction.merchant = "Cajero";
+    transaction.description = "Retiro cajero";
+    transaction.date = extractDate(body);
+
+    return transaction;
+  }
+
+  // =====================
+  // TRANSFERENCIA ENVIADA
+  // =====================
+
+  const transfer = body.match(
+    /Transferiste\s+\$([\d,.]+)\s+a\s+(.+?)\s+/i
+  );
+
+  if (transfer) {
+    transaction.type = "transfer";
+    transaction.amount = parseAmount(transfer[1]);
+    transaction.merchant = transfer[2].trim();
+    transaction.description = `Transferencia a ${transaction.merchant}`;
+    transaction.date = extractDate(body);
+
+    return transaction;
+  }
+
+  return null;
+};
+
+
+
+// =====================
+// HELPERS
+// =====================
+
+function normalizeBody(body, mimeType) {
+
+  if (mimeType === "text/html") {
+    return htmlToText(body, {
+      wordwrap: false,
+      selectors: [{ selector: "img", format: "skip" }]
+    });
+  }
+
+  return body;
+}
+
+function cleanText(text) {
+
+  return text
+    .replace(/\[https?:\/\/.*?\]/g, "")
+    .replace(/Logo Bancolombia/gi, "")
+    .replace(/yellow-icon/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseAmount(value) {
+  return Number(value.replace(/,/g, ""));
+}
+
+function extractDate(text) {
+
+  const match = text.match(
+    /(\d{4}\/\d{2}\/\d{2}).*?(\d{2}:\d{2})/
+  );
+
+  if (!match) return null;
+
+  return new Date(`${match[1]} ${match[2]}`);
+}*/

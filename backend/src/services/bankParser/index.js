@@ -1,4 +1,4 @@
-import { parseBancolombia } from "./bancolombiaParser.js";
+import { parseBancolombiaEmail } from "./bancolombiaParser.js";
 
 // Remitentes conocidos de cada banco
 const BANK_SENDERS = {
@@ -18,31 +18,6 @@ const detectBank = (fromHeader) => {
   if (BANK_SENDERS.bogota.some((s) => from.includes(s))) return "bogota";
   return null;
 };
-
-// export const parseTransaction = (emailData) => {
-//   // Decodificar body del email desde base64
-//   const parts = emailData.payload.parts || [emailData.payload];
-//   let body = "";
-//   for (const part of parts) {
-//     if (part.mimeType === "text/plain" && part.body?.data) {
-//       body = Buffer.from(part.body.data, "base64").toString("utf-8");
-//       break;
-//     }
-//   }
-
-//   // Si no hay texto plano, intentar con HTML
-//   if (!body) {
-//     for (const part of parts) {
-//       if (part.mimeType === "text/html" && part.body?.data) {
-//         body = Buffer.from(part.body.data, "base64")
-//           .toString("utf-8")
-//           .replace(/<[^>]+>/g, " ") // strip HTML tags
-//           .replace(/\s+/g, " ")
-//           .trim();
-//         break;
-//       }
-//     }
-//   }
 
 export const parseTransaction = (emailData) => {
   const parts = emailData.payload.parts || [emailData.payload];
@@ -72,7 +47,7 @@ export const parseTransaction = (emailData) => {
   }
 
   console.log(`📨 Fuente del body: ${bodySource}`); // 👈
-  console.log(`📝 Primeros 300 chars: ${body.substring(0, 300)}`); // 👈
+  console.log(`📝 Primeros 800 chars: ${body.substring(0, 800)}`); // 👈
 
   // Detectar banco por remitente
   const fromHeader = emailData.payload.headers.find(
@@ -86,7 +61,7 @@ export const parseTransaction = (emailData) => {
 
   // Parsear según banco
   let transaction = null;
-  if (bank === "bancolombia") transaction = parseBancolombia(body);
+  if (bank === "bancolombia") transaction = parseBancolombiaEmail(body);
   // Davivienda y Bogotá se agregan cuando tengas correos reales
 
   if (!transaction) return null;
