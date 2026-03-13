@@ -46,8 +46,8 @@ export const parseTransaction = (emailData) => {
     }
   }
 
-  console.log(`📨 Fuente del body: ${bodySource}`); // 👈
-  console.log(`📝 Primeros 800 chars: ${body.substring(0, 800)}`); // 👈
+  // console.log(`📨 Fuente del body: ${bodySource}`); // 👈
+  // console.log(`📝 Primeros 800 chars: ${body.substring(0, 800)}`); // 👈
 
   // Detectar banco por remitente
   const fromHeader = emailData.payload.headers.find(
