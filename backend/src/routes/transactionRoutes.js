@@ -13,5 +13,7 @@ router.get("/:id", getTransactionById);
 router.post("/", validate(rules.transaction.create), createTransaction);
 router.put("/:id", validate(rules.transaction.update), updateTransaction);
 router.delete("/:id", deleteTransaction);
+// Ruta del chatBot
+// router.get("/metrics", getTransactionById);
 
 export default router;

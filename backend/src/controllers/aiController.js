@@ -5,8 +5,12 @@ import aiService from "../services/aiService.js";
 
 export const chat = async (req, res, next) => {
   try {
-    const { message, history = [] } = req.body;
+    const { message } = req.body;
+
+    // Cargar historial desde DB para mantener contexto
+    const history = await aiService.getHistory(req.user.id);
     const result = await aiService.chat(req.user.id, message, history);
+
     res.json({
       success: true,
       data: { ...result, timestamp: new Date().toISOString() },

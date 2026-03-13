@@ -1,6 +1,6 @@
 import { pool } from "../config/db.js";
 
-const summaryService = {
+export const summaryService = {
   async getSummary(userId, filters = {}) {
     const { start_date, end_date } = filters;
     const conditions = [];
@@ -93,5 +93,3 @@ const summaryService = {
     };
   },
 };
-
-export default summaryService;

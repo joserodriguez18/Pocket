@@ -1,4 +1,4 @@
-import summaryService from "../services/summaryService.js";
+import { summaryService } from "../services/summaryService.js";
 
 // GET /api/summary
 export const getSummary = async (req, res, next) => {
