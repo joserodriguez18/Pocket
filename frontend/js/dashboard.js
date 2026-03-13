@@ -263,15 +263,16 @@ function renderTransactionsTable(txList) {
 
     tbody.innerHTML = list.slice(0, 30).map(tx => `
     <tr>
-      <td>${fmt.date(tx.date)}</td>
+      <td>${(tx.date.split('T')[0])}</td>
       <td>
         <span class="badge badge-${tx.type}">
             ${tx.type === 'income' ? '↑ Ingreso' : tx.type === 'saving' ? '→ Ahorro' : '↓ Gasto'}
         </span>
       </td>
       <td>
-        <span class="badge-${tx.type}">
-            ${tx.type === 'income' ? '↑ Ingreso' : tx.type === 'saving' ? '→ Ahorro' : '↓ Gasto'}
+        <span>
+            <!--${tx.type === 'income' ? '↑ Ingreso' : tx.type === 'saving' ? '→ Ahorro' : '↓ Gasto'}-->
+            ${Number(tx.amount)}
         </span>
       </td>
       <td>${tx.category_name || '—'}</td>
@@ -515,7 +516,9 @@ const syncTransactions = async () => {
     } finally {
         clearInterval(loading); // ← detiene la animación
         btn.disabled = false;
-        btn.innerHTML = '🔄 Sincronizar movimientos bancarios';
+        btn.innerHTML = `<span class="w-5 text-center text-base">⟳</span>
+                    Sincronizar
+                    <p id="sync-status" class="text-xs text-nova-text3 mt-1"></p>`;
     }
 };
 

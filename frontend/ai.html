@@ -5,92 +5,271 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NOVA Finance — Agente IA</title>
-    <link rel="stylesheet" href="/frontend/css/style.css" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Font: Sora -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sora: ['Sora', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        nova: {
+                            bg: '#0a0b0f',
+                            bg2: '#0e0f16',
+                            bg3: '#13141e',
+                            surface: '#191a27',
+                            border: 'rgba(124,0,255,0.15)',
+                            border2: 'rgba(139,0,255,0.3)',
+                            purple: '#7c00ff',
+                            violet: '#8b00ff',
+                            text: '#e8e0ff',
+                            text2: '#9b8ec4',
+                            text3: '#5a5073',
+                        },
+                    },
+                    boxShadow: {
+                        purple: '0 0 32px rgba(124,0,255,0.25)',
+                        'purple-lg': '0 0 64px rgba(124,0,255,0.3)',
+                    },
+                    animation: {
+                        'bubble-in': 'bubbleIn .25s ease forwards',
+                        'typing-bounce': 'typingBounce 1.4s infinite',
+                        'pulse-dot': 'pulseDot 2s infinite',
+                        'spin-slow': 'spin .7s linear infinite',
+                    },
+                    keyframes: {
+                        bubbleIn: {
+                            from: { opacity: '0', transform: 'translateY(8px)' },
+                            to: { opacity: '1', transform: 'none' },
+                        },
+                        typingBounce: {
+                            '0%,60%,100%': { transform: 'none', opacity: '.4' },
+                            '30%': { transform: 'translateY(-6px)', opacity: '1' },
+                        },
+                        pulseDot: {
+                            '0%,100%': { opacity: '1' },
+                            '50%': { opacity: '.3' },
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        /* ── Minimal residual CSS (what Tailwind can't do cleanly inline) ── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: #0a0b0f;
+            color: #e8e0ff;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 0, 255, .4);
+            border-radius: 99px;
+        }
+
+        /* Textarea auto-resize */
+        #chat-input {
+            resize: none;
+        }
+
+        /* Glow ring on focus */
+        #chat-input:focus {
+            outline: none;
+            border-color: #7c00ff;
+            box-shadow: 0 0 0 3px rgba(124, 0, 255, .2);
+        }
+
+        /* Typing dots stagger */
+        .typing-dot:nth-child(2) {
+            animation-delay: .2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: .4s;
+        }
+
+        /* Bubble animation */
+        .chat-bubble {
+            animation: bubbleIn .25s ease forwards;
+        }
+
+        @keyframes bubbleIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: none;
+                opacity: .4;
+            }
+
+            30% {
+                transform: translateY(-6px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .3;
+            }
+        }
+
+        /* Sidebar sticky */
+        .sidebar {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #7c00ff, #bf5aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Nova avatar gradient */
+        .nova-avatar-grad {
+            background: linear-gradient(135deg, #7c00ff, #bf5aff);
+        }
+
+        /* Progress fill */
+        .progress-fill {
+            background: linear-gradient(90deg, #7c00ff, #bf5aff);
+        }
+
+        /* Amount colors */
+        .amount-income {
+            color: #00e5a0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .amount-expense {
+            color: #ff4d6d;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* App shell grid */
+        .app-shell {
+            display: grid;
+            /* grid-template-columns: 240px 1fr; */
+            grid-template-columns: 1fr;
+            grid-template-rows: 64px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            grid-row: 1 / 3;
+        }
+
+        @media (max-width: 768px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
-<body>
+<body class="bg-nova-bg text-nova-text">
     <div class="app-shell">
 
-        <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
-        <aside class="sidebar">
-            <div class="sidebar-logo">
-                <div class="logo-mark">N</div>
-                <div>
-                    <div class="logo-text">NOVA</div>
-                </div>
-                <span class="logo-tag">Finance</span>
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">Principal</div>
-                <a class="nav-item" href="/dashboard.html">
-                    <span class="nav-icon">◈</span> Dashboard
-                </a>
-                <a class="nav-item active" href="/ai.html">
-                    <span class="nav-icon">✦</span> Agente NOVA
-                </a>
-
-                <div class="nav-section-label">Qué puedo hacer</div>
-                <div style="padding:0 8px">
-                    <div
-                        style="background:var(--bg3);border-radius:10px;padding:14px;font-size:12px;color:var(--text2);line-height:1.8">
-                        📝 Registrar transacciones<br />
-                        📊 Consultar estadísticas<br />
-                        📋 Ver mis movimientos<br />
-                        🎯 Estado de mis metas<br />
-                        💡 Consejos financieros
-                    </div>
-                </div>
-
-                <div class="nav-section-label" style="margin-top:20px">Acciones</div>
-                <div class="nav-item" onclick="clearHistory()">
-                    <span class="nav-icon">⊘</span> Borrar historial
-                </div>
-            </nav>
-
-            <div class="sidebar-user">
-                <div class="sidebar-user-info">
-                    <div class="user-avatar" id="user-avatar">?</div>
-                    <div style="overflow:hidden">
-                        <div class="user-name" id="user-name">—</div>
-                        <div class="user-email" id="user-email">—</div>
-                    </div>
-                </div>
-                <button class="btn btn-ghost btn-full" style="margin-top:8px;font-size:12px" onclick="auth.logout()">
-                    Cerrar sesión
-                </button>
-            </div>
-        </aside>
-
-        <!-- ── Header ──────────────────────────────────────────────────────────── -->
-        <header class="app-header">
-            <div class="header-title">Agente NOVA</div>
-            <div class="header-actions">
-                <a href="/dashboard.html" class="btn btn-secondary btn-sm">← Dashboard</a>
-            </div>
+        <!-- ── Header ─────────────────────────────────────────────────────────── -->
+        <header
+            class="flex items-center justify-between px-7 h-16 bg-nova-bg2 border-b border-nova-border sticky top-0 z-10">
+            <span class="font-sora font-bold text-lg tracking-tight gradient-text">Agente POCKETPAL</span>
+            <a href="./dashboard.html"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-nova-surface border border-nova-border text-sm font-medium text-nova-text2 hover:text-nova-text hover:border-nova-border2 transition-all">
+                ← Dashboard
+            </a>
         </header>
 
-        <!-- ── Chat area ────────────────────────────────────────────────────────── -->
-        <main class="app-content" style="display:flex;flex-direction:column;padding:0">
-            <div class="chat-layout"
-                style="height:calc(100vh - 64px);padding:24px;max-width:860px;width:100%;margin:0 auto">
+        <!-- ── Chat area ──────────────────────────────────────────────────────── -->
+        <main class="flex flex-col bg-nova-bg overflow-hidden" style="height:calc(100vh - 64px)">
+            <div class="flex flex-col h-full max-w-3xl w-full mx-auto px-4 sm:px-6 py-5 gap-4">
 
                 <!-- NOVA header -->
-                <div class="nova-header" style="flex-shrink:0">
-                    <div class="nova-avatar">✦</div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <div
+                        class="w-11 h-11 rounded-2xl nova-avatar-grad grid place-items-center text-xl flex-shrink-0 shadow-purple">
+                        ✦</div>
                     <div>
-                        <div class="nova-name">NOVA</div>
-                        <div class="nova-status">En línea · Asistente financiero IA</div>
+                        <div class="font-sora font-bold text-lg gradient-text">POCKETPAL</div>
+                        <div class="flex items-center gap-1.5 text-xs text-nova-purple font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-nova-purple"
+                                style="animation: pulseDot 2s infinite"></span>
+                            En línea · Asistente financiero IA
+                        </div>
                     </div>
                 </div>
 
                 <!-- Messages -->
-                <div class="chat-messages" id="chat-messages">
-                    <!-- Welcome message -->
-                    <div class="chat-bubble assistant">
-                        ¡Hola! Soy <strong>NOVA</strong>, tu asistente financiero personal. 🤖<br /><br />
+                <div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-1 min-h-0" id="chat-messages">
+                    <!-- Welcome bubble -->
+                    <div
+                        class="chat-bubble self-start max-w-[80%] sm:max-w-[75%] bg-nova-surface border border-nova-border rounded-[18px] rounded-bl-sm px-4 py-3.5 text-sm leading-relaxed text-nova-text">
+                        ¡Hola! Soy <strong class="text-nova-purple">NOVA</strong>, tu asistente financiero personal.
+                        🤖<br /><br />
                         Puedo ayudarte a:
-                        <ul style="margin:8px 0 0 18px;color:inherit;line-height:1.9">
+                        <ul class="mt-2 ml-4 space-y-1 text-nova-text2">
                             <li>Registrar ingresos y gastos con solo describirlos</li>
                             <li>Consultar tus estadísticas del mes, semana o año</li>
                             <li>Ver tus últimas transacciones</li>
@@ -98,39 +277,52 @@
                             <li>Darte consejos basados en tus finanzas reales</li>
                         </ul>
                         <br />¿Con qué empezamos?
-                        <span class="bubble-time" id="welcome-time"></span>
+                        <span class="block text-[10px] text-nova-text3 mt-1" id="welcome-time"></span>
                     </div>
                 </div>
 
                 <!-- Input area -->
-                <div class="chat-input-area" style="flex-shrink:0">
-                    <div class="chat-quick-actions">
-                        <div class="quick-action" onclick="sendQuick('¿Cuánto gasté este mes?')">📊 Gasto del mes</div>
-                        <div class="quick-action" onclick="sendQuick('Muéstrame mis últimas transacciones')">📋 Últimas
-                            transacciones</div>
-                        <div class="quick-action" onclick="sendQuick('¿Cómo van mis metas de ahorro?')">🎯 Mis metas
-                        </div>
-                        <div class="quick-action" onclick="sendQuick('Dame un resumen de mis finanzas de este año')">📈
-                            Resumen anual</div>
-                        <div class="quick-action" onclick="sendQuick('Gasté 50000 en alimentación hoy')">+ Registrar
-                            gasto</div>
+                <div class="flex-shrink-0 bg-nova-bg2 border border-nova-border rounded-2xl p-3 flex flex-col gap-2.5">
+
+                    <!-- Quick actions -->
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="sendQuick('¿Cuánto gasté este mes?')"
+                            class="quick-action px-3 py-1.5 rounded-full bg-nova-bg3 border border-nova-border text-nova-text2 text-xs font-medium hover:border-nova-purple hover:text-nova-purple transition-all">📊
+                            Gasto del mes</button>
+                        <button onclick="sendQuick('Muéstrame mis últimas transacciones')"
+                            class="quick-action px-3 py-1.5 rounded-full bg-nova-bg3 border border-nova-border text-nova-text2 text-xs font-medium hover:border-nova-purple hover:text-nova-purple transition-all">📋
+                            Últimas transacciones</button>
+                        <button onclick="sendQuick('¿Cómo van mis metas de ahorro?')"
+                            class="quick-action px-3 py-1.5 rounded-full bg-nova-bg3 border border-nova-border text-nova-text2 text-xs font-medium hover:border-nova-purple hover:text-nova-purple transition-all">🎯
+                            Mis metas</button>
+                        <button onclick="sendQuick('Dame un resumen de mis finanzas de este año')"
+                            class="quick-action hidden sm:inline-flex px-3 py-1.5 rounded-full bg-nova-bg3 border border-nova-border text-nova-text2 text-xs font-medium hover:border-nova-purple hover:text-nova-purple transition-all">📈
+                            Resumen anual</button>
+                        <button onclick="sendQuick('Gasté 50000 en alimentación hoy')"
+                            class="quick-action px-3 py-1.5 rounded-full bg-nova-bg3 border border-nova-border text-nova-text2 text-xs font-medium hover:border-nova-purple hover:text-nova-purple transition-all">+
+                            Registrar gasto</button>
                     </div>
-                    <div class="chat-input-row">
-                        <textarea id="chat-input"
-                            placeholder="Escribe un mensaje... ej: &quot;Gasté $80,000 en el supermercado&quot; o &quot;¿Cuánto gané este mes?&quot;"
-                            rows="1" onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
-                        <button class="chat-send-btn" id="send-btn" onclick="sendMessage()" title="Enviar">
-                            ↑
-                        </button>
+
+                    <!-- Textarea row -->
+                    <div class="flex gap-2.5 items-end">
+                        <textarea id="chat-input" rows="1"
+                            placeholder='Escribe un mensaje… ej: "Gasté $80,000 en el supermercado"'
+                            class="flex-1 bg-nova-bg3 border border-nova-border rounded-xl px-4 py-2.5 text-sm text-nova-text placeholder-nova-text3 leading-relaxed transition-all min-h-[44px] max-h-[120px]"
+                            onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
+                        <button id="send-btn" onclick="sendMessage()" title="Enviar"
+                            class="w-11 h-11 rounded-xl nova-avatar-grad grid place-items-center text-black text-lg font-bold flex-shrink-0 hover:opacity-90 hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 shadow-purple">↑</button>
                     </div>
-                    <div style="font-size:11px;color:var(--text3);text-align:center">
-                        NOVA usa inteligencia artificial para entender tu lenguaje natural
-                    </div>
+
+                    <p class="text-center text-[11px] text-nova-text3">NOVA usa inteligencia artificial para entender tu
+                        lenguaje natural</p>
                 </div>
 
             </div>
         </main>
-    </div>
+    </div><!-- /app-shell -->
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2"></div>
 
     <script src="/frontend/js/api.js"></script>
     <script>
@@ -143,18 +335,17 @@
             document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
         }
 
-        document.getElementById('welcome-time').textContent = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('welcome-time').textContent =
+            new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
-        // Conversation history for context
         let conversationHistory = [];
         let isTyping = false;
 
-        // Load previous history on start
+        // Load history
         (async () => {
             try {
                 const res = await ai.history();
                 if (res.data.history.length > 0) {
-                    // Show last 20 messages
                     const recent = res.data.history.slice(-20);
                     recent.forEach(msg => {
                         addBubble(msg.role, msg.content, new Date(msg.created_at));
@@ -166,10 +357,7 @@
         })();
 
         function handleInputKey(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         }
 
         function autoResize(el) {
@@ -187,13 +375,11 @@
             const message = input.value.trim();
             if (!message || isTyping) return;
 
-            // Add user bubble
             addBubble('user', message);
             input.value = '';
             input.style.height = 'auto';
             conversationHistory.push({ role: 'user', content: message });
 
-            // Show typing indicator
             isTyping = true;
             const typingEl = showTyping();
             document.getElementById('send-btn').disabled = true;
@@ -201,10 +387,8 @@
             try {
                 const res = await ai.chat(message, conversationHistory.slice(-8));
                 typingEl.remove();
-
                 const reply = res.data.message;
                 conversationHistory.push({ role: 'assistant', content: reply });
-
                 addBubble('assistant', reply, new Date(res.data.timestamp), res.data.actionResult);
             } catch (err) {
                 typingEl.remove();
@@ -220,70 +404,78 @@
         function addBubble(role, content, time, actionResult) {
             const container = document.getElementById('chat-messages');
             const bubble = document.createElement('div');
-            bubble.className = `chat-bubble ${role}`;
 
-            // Convert markdown-lite: **bold**, newlines
             const formatted = content
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br/>');
 
             let extra = '';
 
-            // If there's an action result, show a data card
             if (actionResult && actionResult.success) {
                 if (actionResult.actionType === 'TRANSACTION_CREATED') {
                     const tx = actionResult.transaction;
                     extra = `
-          <div class="chat-action-card">
-            <div class="action-type">✓ Transacción registrada</div>
-            <span class="${tx.type === 'income' ? 'amount-income' : 'amount-expense'}">
+          <div class="mt-2.5 bg-nova-bg3 border border-nova-border rounded-xl p-3 text-xs">
+            <div class="text-[10px] uppercase tracking-wider text-nova-text3 mb-1.5 font-semibold">✓ Transacción registrada</div>
+            <span class="${tx.type === 'income' ? 'amount-income' : 'amount-expense'} font-semibold">
               ${tx.type === 'income' ? '+' : '-'}${fmt.currency(tx.amount)}
             </span>
-            &nbsp;·&nbsp; ${tx.category} &nbsp;·&nbsp; ${tx.date}
-            ${tx.description ? `<br/><span style="color:var(--text2);font-size:11px">${tx.description}</span>` : ''}
+            <span class="text-nova-text2"> · ${tx.category} · ${tx.date}</span>
+            ${tx.description ? `<br/><span class="text-nova-text3">${tx.description}</span>` : ''}
           </div>`;
                 } else if (actionResult.actionType === 'STATS_RESULT') {
                     const s = actionResult.stats;
                     extra = `
-          <div class="chat-action-card">
-            <div class="action-type">📊 Estadísticas — ${actionResult.period}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-              <div><span style="color:var(--green)">${fmt.currency(s.total_income)}</span><br/><span style="font-size:10px;color:var(--text3)">Ingresos</span></div>
-              <div><span style="color:var(--red)">${fmt.currency(s.total_expenses)}</span><br/><span style="font-size:10px;color:var(--text3)">Gastos</span></div>
-              <div style="grid-column:span 2"><span style="color:var(--blue)">${fmt.currency(s.net)}</span><br/><span style="font-size:10px;color:var(--text3)">Balance neto · ${s.total_transactions} transacciones</span></div>
+          <div class="mt-2.5 bg-nova-bg3 border border-nova-border rounded-xl p-3 text-xs">
+            <div class="text-[10px] uppercase tracking-wider text-nova-text3 mb-2 font-semibold">📊 Estadísticas — ${actionResult.period}</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><span class="text-green-400 font-mono">${fmt.currency(s.total_income)}</span><br/><span class="text-nova-text3">Ingresos</span></div>
+              <div><span class="text-red-400 font-mono">${fmt.currency(s.total_expenses)}</span><br/><span class="text-nova-text3">Gastos</span></div>
+              <div class="col-span-2"><span class="text-nova-purple font-mono">${fmt.currency(s.net)}</span><br/><span class="text-nova-text3">Balance · ${s.total_transactions} transacciones</span></div>
             </div>
           </div>`;
                 } else if (actionResult.actionType === 'TRANSACTIONS_LIST') {
                     const txs = actionResult.transactions;
                     extra = `
-          <div class="chat-action-card">
-            <div class="action-type">📋 Últimas transacciones</div>
+          <div class="mt-2.5 bg-nova-bg3 border border-nova-border rounded-xl p-3 text-xs">
+            <div class="text-[10px] uppercase tracking-wider text-nova-text3 mb-2 font-semibold">📋 Últimas transacciones</div>
             ${txs.map(t => `
-              <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">
-                <span>${t.category} · ${t.date}</span>
+              <div class="flex justify-between py-1.5 border-b border-nova-border last:border-0">
+                <span class="text-nova-text2">${t.category} · ${t.date}</span>
                 <span class="${t.type === 'income' ? 'amount-income' : 'amount-expense'}">${t.type === 'income' ? '+' : '-'}${fmt.currency(t.amount)}</span>
               </div>`).join('')}
           </div>`;
                 } else if (actionResult.actionType === 'GOALS_STATUS') {
                     const gs = actionResult.goals;
                     extra = `
-          <div class="chat-action-card">
-            <div class="action-type">🎯 Metas de ahorro</div>
+          <div class="mt-2.5 bg-nova-bg3 border border-nova-border rounded-xl p-3 text-xs">
+            <div class="text-[10px] uppercase tracking-wider text-nova-text3 mb-2 font-semibold">🎯 Metas de ahorro</div>
             ${gs.map(g => `
-              <div style="padding:6px 0;border-bottom:1px solid var(--border)">
-                <div style="display:flex;justify-content:space-between;font-size:12px">
-                  <span>${g.title} ${g.is_completed ? '✓' : ''}</span>
-                  <span style="color:var(--green)">${g.pct}%</span>
+              <div class="py-2 border-b border-nova-border last:border-0">
+                <div class="flex justify-between mb-1">
+                  <span class="text-nova-text">${g.title} ${g.is_completed ? '✓' : ''}</span>
+                  <span class="text-nova-purple font-mono">${g.pct}%</span>
                 </div>
-                <div style="height:4px;background:var(--bg);border-radius:99px;margin-top:4px;overflow:hidden">
-                  <div style="height:100%;width:${Math.min(g.pct, 100)}%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px"></div>
+                <div class="h-1 bg-nova-bg rounded-full overflow-hidden">
+                  <div class="h-full progress-fill rounded-full" style="width:${Math.min(g.pct, 100)}%;transition:width .6s ease"></div>
                 </div>
               </div>`).join('')}
           </div>`;
                 }
             }
 
-            bubble.innerHTML = `${formatted}${extra}<span class="bubble-time">${(time || new Date()).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>`;
+            const isUser = role === 'user';
+            bubble.className = `chat-bubble flex flex-col ${isUser ? 'self-end' : 'self-start'} max-w-[80%] sm:max-w-[75%]`;
+
+            bubble.innerHTML = `
+      <div class="${isUser
+                    ? 'bg-nova-purple text-white rounded-[18px] rounded-br-sm'
+                    : 'bg-nova-surface border border-nova-border text-nova-text rounded-[18px] rounded-bl-sm'
+                } px-4 py-3 text-sm leading-relaxed">
+        ${formatted}${extra}
+        <span class="block text-[10px] opacity-50 mt-1">${(time || new Date()).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
+      </div>`;
+
             container.appendChild(bubble);
             scrollToBottom();
         }
@@ -291,8 +483,11 @@
         function showTyping() {
             const container = document.getElementById('chat-messages');
             const el = document.createElement('div');
-            el.className = 'typing-indicator';
-            el.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            el.className = 'self-start flex gap-1 px-4 py-3.5 bg-nova-surface border border-nova-border rounded-[18px] rounded-bl-sm';
+            el.innerHTML = `
+      <div class="typing-dot w-1.5 h-1.5 rounded-full bg-nova-text2" style="animation:typingBounce 1.4s infinite"></div>
+      <div class="typing-dot w-1.5 h-1.5 rounded-full bg-nova-text2" style="animation:typingBounce 1.4s infinite;animation-delay:.2s"></div>
+      <div class="typing-dot w-1.5 h-1.5 rounded-full bg-nova-text2" style="animation:typingBounce 1.4s infinite;animation-delay:.4s"></div>`;
             container.appendChild(el);
             scrollToBottom();
             return el;
@@ -309,11 +504,8 @@
                 await ai.clearHistory();
                 conversationHistory = [];
                 const container = document.getElementById('chat-messages');
-                container.innerHTML = `
-        <div class="chat-bubble assistant">
-          Historial borrado. ¿En qué te puedo ayudar? ✦
-          <span class="bubble-time">${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</span>
-        </div>`;
+                container.innerHTML = '';
+                addBubble('assistant', 'Historial borrado. ¿En qué te puedo ayudar? ✦');
                 toast.success('Historial borrado');
             } catch (err) {
                 toast.error(err.message);

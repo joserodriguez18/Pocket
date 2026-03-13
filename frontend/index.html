@@ -1,132 +1,199 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-[#0a0b0f]">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NOVA Finance — Inicia sesión</title>
-    <link rel="stylesheet" href="/frontend/css/style.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        // Configuración de colores personalizados según tu paleta
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7c00ff',      // Tu color base
+                        primaryLight: '#8b00ff', // Tu color claro
+                        darkBg: '#0a0b0f',       // Tu fondo oscuro
+                        surface: '#16181d',      // Color de superficies/paneles
+                    },
+                    fontFamily: {
+                        sora: ['Sora', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            /* Animación para el spinner de carga */
+            .spinner {
+                @apply w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block;
+            }
+            /* Efecto de cristal para las tarjetas */
+            .glass-panel {
+                @apply bg-[#0d0e12]/90 backdrop-blur-xl border border-white/10;
+            }
+        }
+    </style>
 </head>
 
-<body class="auth-page">
+<body class="font-sora text-gray-200 h-full antialiased">
 
-    <!-- Left: Hero -->
-    <div class="auth-hero">
-        <div class="auth-hero-logo">
-            <div class="logo-mark">N</div>
-            <span>NOVA Finance</span>
-        </div>
-        <div class="auth-hero-content">
-            <h1>Tu dinero,<br />bajo <em>control.</em></h1>
-            <p>Gestiona ingresos, gastos y metas de ahorro con la ayuda de un agente de inteligencia artificial que
-                entiende tu lenguaje.</p>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="hero-stat-value">IA</div>
-                    <div class="hero-stat-label">Agente NOVA integrado</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
+
+        <div
+            class="hidden lg:flex flex-col justify-center p-16 relative overflow-hidden bg-gradient-to-br from-[#0a0b0f] via-[#120a1f] to-[#0a0b0f]">
+
+            <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"></div>
+            <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-primaryLight/10 rounded-full blur-[100px]"></div>
+
+            <div class="relative z-10 flex items-center flex-col">
+                <div class="flex items-center gap-3 mb-16">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-extrabold text-white shadow-[0_0_20px_rgba(124,0,255,0.4)]">
+                        N</div>
+                    <span class="text-xl font-bold tracking-tight">NOVA Finance</span>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">∞</div>
-                    <div class="hero-stat-label">Historial de transacciones</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">📊</div>
-                    <div class="hero-stat-label">Gráficas en tiempo real</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">🎯</div>
-                    <div class="hero-stat-label">Metas de ahorro</div>
+
+                <div class="max-w-md">
+                    <h1 class="text-6xl font-extrabold leading-tight tracking-tighter mb-6">
+                        Tu dinero,<br /><span class="text-primaryLight italic">bajo control.</span>
+                    </h1>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-12">
+                        Gestiona ingresos, gastos y metas de ahorro con la ayuda de un agente de inteligencia artificial
+                        que entiende tu lenguaje.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div
+                            class="group relative p-[1px] rounded-2xl bg-gradient-to-br from-primary/50 to-transparent hover:from-primary transition-all duration-500">
+                            <div class="glass-panel rounded-2xl p-6 h-full relative overflow-hidden">
+                                <div
+                                    class="absolute -right-4 -top-4 w-12 h-12 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/40 transition-colors">
+                                </div>
+                                <div class="relative z-10 text-3xl mb-3">🤖</div>
+                                <div class="text-2xl font-black text-white mb-1 tracking-tight">Agente <span
+                                        class="text-primaryLight">IA</span></div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">Inteligencia
+                                    Nova</div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="group relative p-[1px] rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primaryLight/50 transition-all duration-500">
+                            <div class="glass-panel rounded-2xl p-6 h-full">
+                                <div class="text-3xl mb-3">🕒</div>
+                                <div class="text-2xl font-black text-white mb-1 tracking-tight">Historial</div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">Registros ∞
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="group relative p-[1px] rounded-2xl bg-gradient-to-br from-white/10 to-transparent hover:from-primaryLight/50 transition-all duration-500">
+                            <div class="glass-panel rounded-2xl p-6 h-full">
+                                <div class="text-3xl mb-3">📊</div>
+                                <div class="text-2xl font-black text-white mb-1 tracking-tight">Análisis</div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">Tiempo Real
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="group relative p-[1px] rounded-2xl bg-gradient-to-br from-primaryLight/50 to-transparent hover:from-primary transition-all duration-500 shadow-[0_0_30px_-15px_rgba(124,0,255,0.3)]">
+                            <div class="glass-panel rounded-2xl p-6 h-full relative overflow-hidden">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                </div>
+                                <div class="relative z-10 text-3xl mb-3">🎯</div>
+                                <div class="text-2xl font-black text-white mb-1 tracking-tight">Metas</div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">Objetivos
+                                    2026</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Right: Auth form -->
-    <div class="auth-panel">
-        <div class="auth-form-box">
-            <h2>Bienvenido</h2>
-            <p class="auth-sub">Accede a tu cuenta o crea una nueva</p>
+        <div class="flex items-center justify-center p-8 bg-[#0a0b0f] lg:bg-[#0d0e12]">
+            <div class="w-full max-w-[400px]">
 
-            <div class="auth-tabs">
-                <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
-                <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
-            </div>
-
-            <!-- Login Form -->
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Correo electrónico</label>
-                    <input type="email" id="login-email" placeholder="tu@correo.com" required />
+                <div class="mb-10 text-center lg:text-left">
+                    <h2 class="text-3xl font-bold mb-2 text-white">Bienvenido</h2>
+                    <p class="text-gray-500 font-medium">Accede a tu cuenta o crea una nueva</p>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" id="login-password" placeholder="Tu contraseña" required />
-                </div>
-                <button type="submit" class="btn btn-primary" id="login-btn">
-                    Iniciar sesión
-                </button>
-                <!-- <div id="google-row">
-                    <div class="login-divider">
-                        <p class="">o continuar con</p>
-                    </div>
-                    <button class="btn btn-google" onclick="loginGoogle()">
-                        <svg width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="#4285F4"
-                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="#34A853"
-                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="#FBBC05"
-                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-                            <path fill="#EA4335"
-                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                        Continuar con google
+
+                <div class="flex bg-white/5 p-1 rounded-xl mb-8 border border-white/5">
+                    <button id="tab-login" onclick="switchTab('login')"
+                        class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 bg-white/10 text-white shadow-lg">
+                        Iniciar sesión
                     </button>
-                </div> -->
-            </form>
-
-            <!-- Register Form -->
-            <form id="register-form" style="display:none" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label class="form-label">Nombre completo</label>
-                    <input type="text" id="reg-name" placeholder="Tu nombre" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Correo electrónico</label>
-                    <input type="email" id="reg-email" placeholder="tu@correo.com" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required />
-                </div>
-                <button type="submit" class="btn btn-primary" id="register-btn">
-                    Crear mi cuenta
-                </button>
-                <!-- <div id="google-row">
-                    <div class="login-divider">
-                        <p class="">o iniciar con</p>
-                    </div>
-                    <button class="btn btn-google" onclick="handleLogin()">
-                        <svg width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="#4285F4"
-                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="#34A853"
-                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="#FBBC05"
-                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-                            <path fill="#EA4335"
-                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                        Continuar con google
+                    <button id="tab-register" onclick="switchTab('register')"
+                        class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-gray-500 hover:text-gray-300">
+                        Crear cuenta
                     </button>
-                </div> -->
-            </form>
-            <div id="google-row">
-                <div class="login-divider">
-                    <p class="">o continuar con</p>
                 </div>
-                <button id="btn-google" class="btn btn-google">
-                    <svg width="16" height="16" viewBox="0 0 24 24">
+
+                <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+                    <div class="space-y-2">
+                        <label class="text-[11px] uppercase tracking-widest font-black text-gray-500">Correo
+                            electrónico</label>
+                        <input type="email" id="login-email" placeholder="tu@correo.com" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-primaryLight focus:ring-1 focus:ring-primaryLight transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] uppercase tracking-widest font-black text-gray-500">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-primaryLight focus:ring-1 focus:ring-primaryLight transition-all" />
+                    </div>
+                    <button type="submit" id="login-btn"
+                        class="w-full bg-primary hover:bg-primaryLight text-white font-bold py-4 rounded-xl transition-all shadow-[0_10px_20px_-10px_rgba(124,0,255,0.5)] active:scale-[0.98]">
+                        Iniciar sesión
+                    </button>
+                </form>
+
+                <form id="register-form" class="space-y-5 hidden" onsubmit="handleRegister(event)">
+                    <div class="space-y-2">
+                        <label class="text-[11px] uppercase tracking-widest font-black text-gray-500">Nombre
+                            completo</label>
+                        <input type="text" id="reg-name" placeholder="Tu nombre" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-primaryLight focus:ring-1 focus:ring-primaryLight transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] uppercase tracking-widest font-black text-gray-500">Correo
+                            electrónico</label>
+                        <input type="email" id="reg-email" placeholder="tu@correo.com" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-primaryLight focus:ring-1 focus:ring-primaryLight transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] uppercase tracking-widest font-black text-gray-500">Contraseña</label>
+                        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-primaryLight focus:ring-1 focus:ring-primaryLight transition-all" />
+                    </div>
+                    <button type="submit" id="register-btn"
+                        class="w-full bg-primary hover:bg-primaryLight text-white font-bold py-4 rounded-xl transition-all shadow-[0_10px_20px_-10px_rgba(124,0,255,0.5)] active:scale-[0.98]">
+                        Crear mi cuenta
+                    </button>
+                </form>
+
+                <div class="relative my-10">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-white/5"></div>
+                    </div>
+                    <div class="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                        <span class="bg-[#0a0b0f] lg:bg-[#0d0e12] px-4 text-gray-600">o continuar con</span>
+                    </div>
+                </div>
+
+                <button id="btn-google"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-[0.98]">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
                         <path fill="#4285F4"
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                         <path fill="#34A853"
@@ -136,7 +203,7 @@
                         <path fill="#EA4335"
                             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
-                    Continuar con google
+                    Google
                 </button>
             </div>
         </div>
@@ -144,21 +211,37 @@
 
     <script src="/frontend/js/api.js"></script>
     <script>
-        // Redirect if already logged in
-        if (isLoggedIn()) window.location.href = '/frontend/dashboard.html';
+        // Redirección si ya está logueado
+        if (typeof isLoggedIn === 'function' && isLoggedIn()) window.location.href = '/frontend/dashboard.html';
+
         const btnGoogle = document.getElementById('btn-google');
 
+        // Función para cambiar entre pestañas Login/Registro
         function switchTab(tab) {
-            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-            document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-            document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
-            document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+            const isLogin = tab === 'login';
+            const loginBtn = document.getElementById('tab-login');
+            const regBtn = document.getElementById('tab-register');
+
+            // Estilos de botones de pestañas
+            if (isLogin) {
+                loginBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 bg-white/10 text-white shadow-lg";
+                regBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-gray-500 hover:text-gray-300";
+            } else {
+                regBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 bg-white/10 text-white shadow-lg";
+                loginBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-gray-500 hover:text-gray-300";
+            }
+
+            // Mostrar/Ocultar formularios
+            document.getElementById('login-form').classList.toggle('hidden', !isLogin);
+            document.getElementById('register-form').classList.toggle('hidden', isLogin);
         }
-        
+
+        // Manejo de Google Auth
         btnGoogle.addEventListener('click', () => {
             window.location.href = 'http://localhost:3000/api/auth/google';
         });
 
+        // Manejo de Login
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('login-btn');
@@ -166,19 +249,22 @@
             const password = document.getElementById('login-password').value;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Entrando...';
+            btn.innerHTML = '<span class="spinner mr-2"></span> Entrando...';
 
             try {
                 const res = await auth.login(email, password);
                 saveAuth(res.data.token, res.data.user);
                 window.location.href = '/frontend/dashboard.html';
             } catch (err) {
-                toast.error(err.message);
+                // Se asume que 'toast' existe en tu api.js o globalmente
+                if (window.toast) toast.error(err.message);
+                else alert(err.message);
                 btn.disabled = false;
                 btn.textContent = 'Iniciar sesión';
             }
         }
 
+        // Manejo de Registro
         async function handleRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('register-btn');
@@ -187,14 +273,15 @@
             const password = document.getElementById('reg-password').value;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Creando cuenta...';
+            btn.innerHTML = '<span class="spinner mr-2"></span> Creando...';
 
             try {
                 const res = await auth.register(name, email, password);
                 saveAuth(res.data.token, res.data.user);
                 window.location.href = '/frontend/dashboard.html';
             } catch (err) {
-                toast.error(err.message);
+                if (window.toast) toast.error(err.message);
+                else alert(err.message);
                 btn.disabled = false;
                 btn.textContent = 'Crear mi cuenta';
             }
